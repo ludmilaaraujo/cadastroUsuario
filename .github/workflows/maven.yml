@@ -1,0 +1,9 @@
+- name: RunMavenTest
+  # You may pin to the exact commit or the version.
+  # uses: Maes95/maven-action@69c270aa2d7d371b74a888e3248af909f840585a
+  uses: Maes95/maven-action@1.0.0
+  with:
+    # If true, build jar of the project
+    package: # optional, default is false
+    # Test to exclude
+    exclude: # optional
