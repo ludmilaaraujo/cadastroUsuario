@@ -4,6 +4,7 @@ import com.cadastro.usuario.entity.UsuarioEntity;
 import com.cadastro.usuario.repository.UsuarioRepository;
 import com.cadastro.usuario.request.ModelDadosUsuario;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -29,13 +30,13 @@ public class TesteController {
     public ModelDadosUsuario converteEntidadeEmResponse(UsuarioEntity usuarioEntity) {
         ModelDadosUsuario modelDadosUsuario = new ModelDadosUsuario();
         modelDadosUsuario.setCpf(usuarioEntity.getCpf());
-        modelDadosUsuario.setEndereco(usuarioEntity.getNome());
-        modelDadosUsuario.setCpf(usuarioEntity.getCpf());
+        modelDadosUsuario.setEndereco(usuarioEntity.getEndereco());
+        modelDadosUsuario.setNome(usuarioEntity.getNome());
 
         return modelDadosUsuario;
     }
 
-    @PostMapping("/dadosusuario")
+    @PostMapping("/")
     public UsuarioEntity usuarioResposta(@RequestBody ModelDadosUsuario usuario) {
         return usuarioRepository.save(converteRequestEmEntidade(usuario));
     }
@@ -45,16 +46,16 @@ public class TesteController {
         return ResponseEntity.ok(usuarioRepository.findById(id).get());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity update(@PathVariable long id, @RequestBody ModelDadosUsuario usuario) {
-        return usuarioRepository.findById(id).map(record -> {
-            record.setNome(usuario.getNome());
-            record.setEndereco(usuario.getEndereco());
-            record.setCpf(usuario.getCpf());
-            UsuarioEntity updated = usuarioRepository.save(record);
-            return ResponseEntity.ok().body(updated);
-        }).orElse(ResponseEntity.notFound().build());
+    @PutMapping("{id}")
+    public ResponseEntity update(@PathVariable long id, @RequestBody ModelDadosUsuario modelDadosUsuario) {
+        Optional<UsuarioEntity> usuarioEntity = usuarioRepository.findById(id);
+        if (usuarioEntity.isPresent()){
+            usuarioEntity.get().setNome(modelDadosUsuario.getNome());
+            usuarioEntity.get().setEndereco(modelDadosUsuario.getEndereco());
+            usuarioEntity.get().setCpf(modelDadosUsuario.getCpf());
+            ModelDadosUsuario modeloDadosAlterado = converteEntidadeEmResponse(usuarioEntity.get());
+            return new ResponseEntity(modeloDadosAlterado, HttpStatus.ACCEPTED);
+        }
+        return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
-
-
 }
